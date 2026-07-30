@@ -1,0 +1,6 @@
+name: mysterriaTreinar
+version: '${version}'
+
+main: me.rod.mysterriaTreinar.MysterriaTreinar
+api-version: '26.1.2'
+load: POSTWORLD
