@@ -10,8 +10,8 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Main plugin class for MysterriaTreinar.
- * 
- * onEnable() is now just wiring: create the framework pieces, register the
+ *
+ * onEnable() is just wiring: create the framework pieces, register the
  * abilities, register the listeners. Adding a new ability later is
  * just a new class in abilities.sequences and a register() call here.
  */
@@ -39,7 +39,9 @@ public final class MysterriaTreinar extends JavaPlugin {
 
         // White Tower Seq - (future sequence)
 
-        PlayerAbilitySelection selection = new PlayerAbilitySelection(abilityRegistry, "time_stop");
+        // No default id here anymore - selection is scoped per cycling group,
+        // and each group's default is its first registered ability.
+        PlayerAbilitySelection selection = new PlayerAbilitySelection(abilityRegistry);
         lifecycleListener = new AbilityLifecycleListener(abilityRegistry, cooldowns, selection);
 
         // Register listeners
@@ -50,10 +52,10 @@ public final class MysterriaTreinar extends JavaPlugin {
                 new DamageDispatchListener(abilityRegistry), this);
 
         // Register commands
-        getCommand("givepaper").setExecutor(new GivePaperCommand());
+        getCommand("givepaper").setExecutor(new GivePaperCommand(abilityRegistry));
 
-        getLogger().info("✓ MysterriaTreinar loaded with " + 
-            abilityRegistry.all().size() + " abilities");
+        getLogger().info("✓ MysterriaTreinar loaded with " +
+                abilityRegistry.all().size() + " abilities");
     }
 
     @Override
