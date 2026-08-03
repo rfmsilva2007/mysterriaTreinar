@@ -4,3 +4,10 @@ version: '${version}'
 main: me.rod.mysterriaTreinar.MysterriaTreinar
 api-version: '26.1.2'
 load: POSTWORLD
+
+commands:
+  givepaper:
+    description: Give an ability paper to yourself for testing
+    usage: /givepaper <ability_id>
+    permission: mysterriaTreinar.givepaper
+

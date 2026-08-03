@@ -1,24 +1,19 @@
 package me.rod.mysterriaTreinar;
 
-import me.rod.mysterriaTreinar.abilities.AbilityCycleListener;
-import me.rod.mysterriaTreinar.abilities.AbilityLifecycleListener;
-import me.rod.mysterriaTreinar.abilities.AbilityRegistry;
-import me.rod.mysterriaTreinar.abilities.CooldownManager;
-import me.rod.mysterriaTreinar.abilities.DamageDispatchListener;
-import me.rod.mysterriaTreinar.abilities.PlayerAbilitySelection;
-import me.rod.mysterriaTreinar.abilities.impl.TimeAccelerationAbility;
-import me.rod.mysterriaTreinar.abilities.impl.TimeRewindAbility;
-import me.rod.mysterriaTreinar.abilities.impl.TimeStopAbility;
+import me.rod.mysterriaTreinar.abilities.core.*;
+import me.rod.mysterriaTreinar.abilities.input.*;
+import me.rod.mysterriaTreinar.abilities.lifecycle.*;
+import me.rod.mysterriaTreinar.abilities.sequences.error_seq.*;
+import me.rod.mysterriaTreinar.commands.GivePaperCommand;
 
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * Main plugin class for MysterriaTreinar.
-
+ * 
  * onEnable() is now just wiring: create the framework pieces, register the
- * three abilities, register the listeners. Adding a fourth ability later is
- * a one-line registry.register(...) call here plus a new class in
- * abilities.impl - nothing else in this file changes.
+ * abilities, register the listeners. Adding a new ability later is
+ * just a new class in abilities.sequences and a register() call here.
  */
 public final class MysterriaTreinar extends JavaPlugin {
 
@@ -34,19 +29,31 @@ public final class MysterriaTreinar extends JavaPlugin {
         abilityRegistry = new AbilityRegistry();
         CooldownManager cooldowns = new CooldownManager();
 
-        // register abilities - order here defines clock-cycle order
+        // Register abilities - organized by sequence
+        // Error Seq - Time Manipulation
         abilityRegistry.register(new TimeStopAbility());
         abilityRegistry.register(new TimeRewindAbility(this));
         abilityRegistry.register(new TimeAccelerationAbility());
 
+        // Fool Seq - (abilities will go here)
+
+        // White Tower Seq - (future sequence)
+
         PlayerAbilitySelection selection = new PlayerAbilitySelection(abilityRegistry, "time_stop");
         lifecycleListener = new AbilityLifecycleListener(abilityRegistry, cooldowns, selection);
 
+        // Register listeners
         getServer().getPluginManager().registerEvents(
-                new AbilityCycleListener(abilityRegistry, selection, cooldowns), this);
+                new PaperAbilityListener(abilityRegistry, cooldowns, selection), this);
         getServer().getPluginManager().registerEvents(lifecycleListener, this);
         getServer().getPluginManager().registerEvents(
                 new DamageDispatchListener(abilityRegistry), this);
+
+        // Register commands
+        getCommand("givepaper").setExecutor(new GivePaperCommand());
+
+        getLogger().info("✓ MysterriaTreinar loaded with " + 
+            abilityRegistry.all().size() + " abilities");
     }
 
     @Override
