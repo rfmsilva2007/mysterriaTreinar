@@ -22,7 +22,7 @@ public class CooldownManager {
         return System.currentTimeMillis() >= readyAt;
     }
 
-    public void startCooldown(UUID playerId, String abilityId, long cooldownTicks) {
+    public synchronized void startCooldown(UUID playerId, String abilityId, long cooldownTicks) {
         long millis = cooldownTicks * 50L; // 1 tick = 50ms
         readyAtByPlayer
                 .computeIfAbsent(playerId, k -> new HashMap<>())

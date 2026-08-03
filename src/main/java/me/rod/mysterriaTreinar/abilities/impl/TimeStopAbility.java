@@ -1,21 +1,19 @@
 package me.rod.mysterriaTreinar.abilities.impl;
 
-import me.rod.mysterriaTreinar.abilities.Ability;
+import me.rod.mysterriaTreinar.abilities.AbstractAreaAbility;
 
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 
 /**
  * Immobilizes nearby living entities for a fixed duration.
  * Stateless between activations, so it needs no lifecycle cleanup at all.
  */
-public class TimeStopAbility implements Ability {
+public class TimeStopAbility extends AbstractAreaAbility {
 
     private static final int DURATION_TICKS = 20 * 30; // 30 seconds
-    private static final long COOLDOWN_TICKS = 20 * 60; // 60 seconds - tune to taste
+    private static final long COOLDOWN_TICKS = 20 * 60; // 60 seconds
+    private static final int RANGE = 15;
 
     @Override
     public String getId() {
@@ -29,11 +27,8 @@ public class TimeStopAbility implements Ability {
 
     @Override
     public void activate(Player player) {
-        for (Entity entity : player.getNearbyEntities(15, 15, 15)) {
-            if (!(entity instanceof LivingEntity living) || living.equals(player)) continue;
-            living.addPotionEffect(new PotionEffect(PotionEffectType.SLOWNESS, DURATION_TICKS, 255, false, false));
-            living.addPotionEffect(new PotionEffect(PotionEffectType.MINING_FATIGUE, DURATION_TICKS, 255, false, false));
-        }
+        applyEffectToNearbyEntities(player, RANGE, PotionEffectType.SLOWNESS, DURATION_TICKS, 255);
+        applyEffectToNearbyEntities(player, RANGE, PotionEffectType.MINING_FATIGUE, DURATION_TICKS, 255);
         player.sendMessage("§bTime stops around you.");
     }
 }

@@ -21,6 +21,9 @@ public class AbilityRegistry {
     private final Map<String, Ability> abilities = new LinkedHashMap<>();
 
     public void register(Ability ability) {
+        if (abilities.containsKey(ability.getId())) {
+            throw new IllegalArgumentException("Ability with ID '" + ability.getId() + "' already registered!");
+        }
         abilities.put(ability.getId(), ability);
     }
 

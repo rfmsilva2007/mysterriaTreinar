@@ -12,6 +12,8 @@ import org.bukkit.scheduler.BukkitTask;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * On activation, takes a snapshot and opens a window during which damage that
@@ -28,9 +30,10 @@ public class TimeRewindAbility implements Ability, DamageReactive {
 
     private static final double LOW_HEALTH_THRESHOLD = 4.0; // 2 hearts
     private static final int WINDOW_TICKS = 20 * 45;         // 45 seconds
-    private static final long COOLDOWN_TICKS = 20 * 90;      // 90 seconds - tune to taste
+    private static final long COOLDOWN_TICKS = 20 * 90;      // 90 seconds
 
     private final Plugin plugin;
+    private final Logger logger;
     private final Map<UUID, BukkitTask> pendingWindows = new HashMap<>();
     private final Map<UUID, RewindState> snapshots = new HashMap<>();
 
@@ -38,6 +41,7 @@ public class TimeRewindAbility implements Ability, DamageReactive {
 
     public TimeRewindAbility(Plugin plugin) {
         this.plugin = plugin;
+        this.logger = Logger.getLogger("MysterriaTreinar");
     }
 
     @Override
@@ -100,10 +104,14 @@ public class TimeRewindAbility implements Ability, DamageReactive {
         UUID id = player.getUniqueId();
         if (!pendingWindows.containsKey(id)) return;
 
-        double resultingHealth = player.getHealth() - event.getFinalDamage();
-        if (resultingHealth < LOW_HEALTH_THRESHOLD) {
-            event.setCancelled(true);
-            executeRewind(player);
+        try {
+            double resultingHealth = player.getHealth() - event.getFinalDamage();
+            if (resultingHealth < LOW_HEALTH_THRESHOLD) {
+                event.setCancelled(true);
+                executeRewind(player);
+            }
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error in Time Rewind damage handler", e);
         }
     }
 
@@ -111,18 +119,33 @@ public class TimeRewindAbility implements Ability, DamageReactive {
         UUID id = player.getUniqueId();
         RewindState state = snapshots.remove(id);
         BukkitTask task = pendingWindows.remove(id);
-        if (task != null) task.cancel();
-        if (state == null) return;
+        
+        if (task != null) {
+            task.cancel();
+        }
+        
+        if (state == null) {
+            logger.log(Level.WARNING, "Time Rewind: No snapshot found for player " + player.getName());
+            player.sendMessage("§c[Time Rewind] Failed to restore state. Report this bug!");
+            return;
+        }
 
-        player.teleport(state.location());
-        player.setHealth(state.health());
-        player.setFoodLevel(state.food());
-        player.sendMessage("§bTime rewound!");
+        try {
+            player.teleport(state.location());
+            player.setHealth(state.health());
+            player.setFoodLevel(state.food());
+            player.sendMessage("§bTime rewound!");
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Error executing time rewind for " + player.getName(), e);
+            player.sendMessage("§c[Time Rewind] Error restoring state.");
+        }
     }
 
     private void cancelSilently(UUID id) {
         BukkitTask task = pendingWindows.remove(id);
-        if (task != null) task.cancel();
+        if (task != null) {
+            task.cancel();
+        }
         snapshots.remove(id);
     }
 }
