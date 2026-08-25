@@ -4,6 +4,7 @@ import me.rod.mysterriaTreinar.abilities.core.*;
 import me.rod.mysterriaTreinar.abilities.input.*;
 import me.rod.mysterriaTreinar.abilities.lifecycle.*;
 import me.rod.mysterriaTreinar.abilities.sequences.error_seq.*;
+
 import me.rod.mysterriaTreinar.commands.GivePaperCommand;
 
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,7 +22,6 @@ public final class MysterriaTreinar extends JavaPlugin {
 
     private AbilityRegistry abilityRegistry;
     private AbilityLifecycleListener lifecycleListener;
-
     @Override
     public void onEnable() {
         instance = this;
@@ -30,14 +30,13 @@ public final class MysterriaTreinar extends JavaPlugin {
         CooldownManager cooldowns = new CooldownManager();
 
         // Register abilities - organized by sequence
-        // Error Seq - Time Manipulation
+        // Error Seq
         abilityRegistry.register(new TimeStopAbility());
         abilityRegistry.register(new TimeRewindAbility(this));
         abilityRegistry.register(new TimeAccelerationAbility());
 
-        // Fool Seq - (abilities will go here)
+        // Fool Seq
 
-        // White Tower Seq - (future sequence)
 
         // No default id here anymore - selection is scoped per cycling group,
         // and each group's default is its first registered ability.
